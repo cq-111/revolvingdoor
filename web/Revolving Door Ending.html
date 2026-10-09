@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revolving Door — 个人风格知识库</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg-deep:#0a0a0f;--bg-mid:#12121a;
+  --stair-light:#c8c8d0;--stair-mid:#8a8a96;--stair-dark:#4a4a56;
+  --text-primary:#d0d0d8;--text-dim:#6a6a76;--accent:#9a8a6a;
+  --glass:rgba(255,255,255,0.04);--glass-border:rgba(255,255,255,0.08);
+}
+html{scroll-behavior:smooth;}
+body{font-family:'Helvetica Neue',Arial,'Noto Sans SC',sans-serif;background:var(--bg-deep);color:var(--text-primary);overflow-x:hidden;min-height:100vh;}
+
+#cosmos{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+.nebula{position:fixed;border-radius:50%;filter:blur(120px);opacity:0.12;pointer-events:none;z-index:0;animation:nebulaDrift 40s ease-in-out infinite alternate;}
+.nebula-1{width:600px;height:600px;background:#3a2a5a;top:-200px;left:-100px;}
+.nebula-2{width:500px;height:500px;background:#1a3a4a;bottom:-150px;right:-100px;animation-delay:-15s;}
+.nebula-3{width:400px;height:400px;background:#5a2a3a;top:40%;left:50%;animation-delay:-25s;opacity:0.08;}
+@keyframes nebulaDrift{0%{transform:translate(0,0) scale(1);}100%{transform:translate(30px,-20px) scale(1.1);}}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(10,10,15,0.95) 0%,transparent 100%);backdrop-filter:blur(10px);}
+.nav-logo{font-size:14px;letter-spacing:6px;text-transform:uppercase;color:var(--stair-light);font-weight:300;}
+.nav-links{display:flex;gap:28px;}
+.nav-links a{color:var(--text-dim);text-decoration:none;font-size:12px;letter-spacing:2px;text-transform:uppercase;transition:color 0.3s;cursor:pointer;}
+.nav-links a:hover{color:var(--stair-light);}
+
+.page{display:none;position:relative;z-index:2;min-height:100vh;padding:100px 40px 60px;}
+.page.active{display:block;}
+
+#page-home{padding-top:60px;}
+#page-home.active{display:flex;flex-direction:column;align-items:center;}
+
+.hero-title{text-align:center;margin-bottom:20px;flex-shrink:0;}
+.hero-title h1{font-size:clamp(28px,5vw,56px);font-weight:200;letter-spacing:14px;text-transform:uppercase;color:var(--stair-light);text-shadow:0 0 60px rgba(200,200,210,0.15);}
+.hero-title p{margin-top:14px;font-size:12px;letter-spacing:6px;color:var(--text-dim);text-transform:uppercase;font-style:italic;}
+
+.stair-scene{width:min(1100px,96vw);height:min(680px,74vh);position:relative;perspective:1700px;perspective-origin:50% 45%;flex-shrink:0;}
+.stair-pivot{width:100%;height:100%;position:absolute;left:0;top:0;transform-style:preserve-3d;will-change:transform;}
+
+.stair-step{position:absolute;left:50%;top:50%;width:220px;height:26px;margin-left:-110px;margin-top:-13px;transform-style:preserve-3d;cursor:pointer;}
+.stair-step .face-top{position:absolute;left:0;top:0;width:100%;height:88px;background:linear-gradient(135deg,#e8e8f0 0%,#b8b8c4 35%,#7a7a86 100%);border:1px solid rgba(230,230,240,0.45);border-radius:3px;transform-origin:center top;transform:rotateX(-90deg);box-shadow:inset 0 1px 0 rgba(255,255,255,0.5),inset 1px 0 0 rgba(255,255,255,0.2),inset -1px 0 0 rgba(0,0,0,0.2),0 0 50px rgba(190,190,220,0.22);transition:background 0.35s,box-shadow 0.35s;}
+.stair-step .face-front{position:absolute;left:0;top:0;width:100%;height:26px;background:linear-gradient(180deg,#7a7a86 0%,#3a3a46 55%,#1a1a24 100%);border:1px solid rgba(200,200,210,0.15);border-top:none;border-radius:0 0 3px 3px;transform:translateZ(-88px) translateY(0);transition:background 0.35s;}
+.stair-step .face-side{position:absolute;left:0;top:0;width:88px;height:26px;background:linear-gradient(90deg,#5a5a66 0%,#2a2a34 100%);border:1px solid rgba(200,200,210,0.1);border-right:none;border-radius:3px 0 0 3px;transform-origin:left center;transform:translateZ(-44px) translateX(-44px) rotateY(-90deg);transition:background 0.35s;}
+.stair-step:hover .face-top{background:linear-gradient(135deg,#ffffff 0%,#d0d0dc 40%,#a0a0ac 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,0.7),inset 1px 0 0 rgba(255,255,255,0.3),inset -1px 0 0 rgba(0,0,0,0.25),0 0 80px rgba(220,220,240,0.4);}
+.stair-step:hover .face-front{background:linear-gradient(180deg,#9a9aa6 0%,#5a5a66 55%,#3a3a46 100%);}
+.stair-step:hover .face-side{background:linear-gradient(90deg,#8a8a96 0%,#4a4a56 100%);}
+
+.stair-step.empty .face-top{background:linear-gradient(135deg,#4a4a56 0%,#2a2a34 50%,#1a1a24 100%);border-color:rgba(200,200,210,0.15);box-shadow:inset 0 1px 0 rgba(200,200,210,0.15),0 0 30px rgba(120,120,140,0.15);}
+.stair-step.empty .face-front{background:linear-gradient(180deg,#3a3a46 0%,#1a1a24 55%,#0a0a10 100%);}
+.stair-step.empty .face-side{background:linear-gradient(90deg,#2a2a34 0%,#101018 100%);}
+.stair-step.empty:hover .face-top{background:linear-gradient(135deg,#7a7a86 0%,#5a5a66 50%,#3a3a46 100%);}
+
+.stair-label{position:absolute;left:100%;top:50%;transform:translateY(-50%) translateZ(-44px);margin-left:16px;padding:5px 14px;font-size:11px;letter-spacing:3px;color:var(--stair-light);white-space:nowrap;background:rgba(10,10,15,0.7);border:1px solid rgba(200,200,210,0.18);border-radius:2px;backdrop-filter:blur(6px);opacity:0.55;transition:opacity 0.3s,background 0.3s,border-color 0.3s,transform 0.3s;pointer-events:none;font-family:inherit;}
+.stair-step.empty .stair-label{color:var(--text-dim);font-style:italic;opacity:0.4;}
+.stair-step:hover .stair-label{opacity:1;background:rgba(200,200,210,0.12);border-color:rgba(200,200,210,0.4);transform:translateY(-50%) translateZ(-44px) translateX(4px);}
+
+.stair-glow{position:absolute;left:50%;top:5%;width:2px;height:90%;margin-left:-1px;background:linear-gradient(180deg,transparent,rgba(200,200,210,0.08),rgba(200,200,210,0.12),rgba(200,200,210,0.08),transparent);pointer-events:none;z-index:-1;}
+
+.add-node-btn{position:fixed;bottom:32px;right:32px;z-index:50;padding:14px 26px;background:rgba(154,138,106,0.15);border:1px solid rgba(154,138,106,0.4);color:var(--accent);font-size:12px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:2px;font-family:inherit;backdrop-filter:blur(8px);transition:all 0.3s;}
+.add-node-btn:hover{background:rgba(154,138,106,0.3);border-color:rgba(154,138,106,0.7);transform:translateY(-2px);box-shadow:0 8px 24px rgba(154,138,106,0.2);}
+
+#musicToggle{position:fixed;bottom:32px;left:32px;z-index:50;width:52px;height:52px;border-radius:50%;background:rgba(154,138,106,0.15);border:1px solid rgba(154,138,106,0.4);color:var(--accent);font-size:20px;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(8px);font-family:inherit;}
+#musicToggle:hover{background:rgba(154,138,106,0.3);border-color:rgba(154,138,106,0.7);transform:scale(1.08);box-shadow:0 0 24px rgba(154,138,106,0.3);}
+#musicToggle.playing{background:rgba(154,138,106,0.35);border-color:rgba(154,138,106,0.8);box-shadow:0 0 32px rgba(154,138,106,0.4);animation:musicPulse 2s ease-in-out infinite;}
+#musicToggle.playing #musicIcon{animation:musicSpin 4s linear infinite;display:inline-block;}
+@keyframes musicPulse{0%,100%{box-shadow:0 0 20px rgba(154,138,106,0.3);}50%{box-shadow:0 0 40px rgba(154,138,106,0.5);}}
+@keyframes musicSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+#page-index{max-width:1200px;margin:0 auto;}
+.index-header{margin-bottom:40px;display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;}
+.index-header h2{font-size:28px;font-weight:200;letter-spacing:8px;text-transform:uppercase;color:var(--stair-light);margin-bottom:8px;}
+.index-header p{font-size:12px;color:var(--text-dim);letter-spacing:2px;}
+.add-art-btn{padding:12px 24px;background:rgba(154,138,106,0.15);border:1px solid rgba(154,138,106,0.4);color:var(--accent);font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:2px;font-family:inherit;transition:all 0.3s;}
+.add-art-btn:hover{background:rgba(154,138,106,0.3);border-color:rgba(154,138,106,0.7);transform:translateY(-2px);}
+
+.filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:30px;}
+.filter-btn{padding:8px 18px;background:var(--glass);border:1px solid var(--glass-border);border-radius:2px;color:var(--text-dim);font-size:11px;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all 0.3s;font-family:inherit;}
+.filter-btn:hover,.filter-btn.active{background:rgba(200,200,210,0.1);border-color:rgba(200,200,210,0.3);color:var(--stair-light);}
+
+.search-wrap{margin-bottom:30px;}
+.search-wrap input{width:100%;max-width:520px;padding:14px 20px;background:var(--glass);border:1px solid var(--glass-border);border-radius:2px;color:var(--text-primary);font-size:14px;font-family:inherit;letter-spacing:1px;outline:none;transition:border-color 0.3s;}
+.search-wrap input::placeholder{color:var(--text-dim);}
+.search-wrap input:focus{border-color:rgba(200,200,210,0.3);}
+
+.work-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:20px;}
+.work-card{background:var(--glass);border:1px solid var(--glass-border);border-radius:2px;padding:24px;transition:all 0.35s;cursor:pointer;position:relative;overflow:hidden;}
+.work-card:hover{border-color:rgba(200,200,210,0.25);background:rgba(255,255,255,0.06);transform:translateY(-3px);}
+.work-card::before{content:'';position:absolute;top:0;left:0;width:2px;height:0;background:var(--accent);transition:height 0.4s;}
+.work-card:hover::before{height:100%;}
+.work-card .card-img{width:100%;height:160px;background:linear-gradient(135deg,#1a1a24,#2a2a38);border-radius:2px;margin-bottom:16px;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;}
+.work-card .card-img img{width:100%;height:100%;object-fit:cover;opacity:0.85;transition:opacity 0.3s,transform 0.4s;}
+.work-card:hover .card-img img{opacity:1;transform:scale(1.04);}
+.card-img .placeholder-icon{font-size:36px;color:var(--stair-dark);letter-spacing:4px;}
+.work-card h3{font-size:15px;font-weight:400;color:var(--stair-light);letter-spacing:1px;margin-bottom:6px;}
+.work-card .meta{font-size:11px;color:var(--text-dim);letter-spacing:1px;margin-bottom:12px;}
+.work-card .desc{font-size:12px;color:var(--text-dim);line-height:1.7;margin-bottom:14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;}
+.tag{padding:3px 10px;font-size:10px;letter-spacing:1px;border-radius:2px;background:rgba(200,200,210,0.06);color:var(--text-dim);border:1px solid rgba(200,200,210,0.08);}
+.tag.medium{background:rgba(154,138,106,0.12);color:#9a8a6a;border-color:rgba(154,138,106,0.2);}
+.tag.theory{background:rgba(100,120,160,0.1);color:#7a8ab0;border-color:rgba(100,120,160,0.18);}
+.work-card .card-link{font-size:11px;color:var(--accent);letter-spacing:1px;display:inline-block;border-bottom:1px solid transparent;transition:border-color 0.3s;}
+.work-card:hover .card-link{border-bottom-color:var(--accent);}
+.empty-state{grid-column:1/-1;text-align:center;padding:80px 20px;color:var(--text-dim);font-size:13px;letter-spacing:2px;}
+
+#page-detail{max-width:1200px;margin:0 auto;}
+.detail-back{margin-bottom:30px;display:flex;gap:12px;flex-wrap:wrap;}
+.detail-back button{background:var(--glass);border:1px solid var(--glass-border);color:var(--text-dim);padding:10px 22px;font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:2px;transition:all 0.3s;font-family:inherit;}
+.detail-back button:hover{color:var(--stair-light);border-color:rgba(200,200,210,0.3);background:rgba(200,200,210,0.08);}
+.detail-back button.edit-btn{background:rgba(154,138,106,0.12);border-color:rgba(154,138,106,0.35);color:var(--accent);}
+.detail-back button.edit-btn:hover{background:rgba(154,138,106,0.25);border-color:rgba(154,138,106,0.6);}
+.detail-back button.danger{color:#a06060;border-color:rgba(160,96,96,0.3);background:rgba(160,96,96,0.08);}
+.detail-back button.danger:hover{background:rgba(160,96,96,0.2);border-color:rgba(160,96,96,0.6);color:#d08080;}
+
+.detail-hero{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-bottom:60px;align-items:start;}
+.detail-image{width:100%;aspect-ratio:4/3;background:linear-gradient(135deg,#1a1a24,#2a2a38);border:1px solid var(--glass-border);border-radius:3px;overflow:hidden;display:flex;align-items:center;justify-content:center;position:sticky;top:100px;}
+.detail-image img{width:100%;height:100%;object-fit:cover;display:block;}
+.img-placeholder{font-size:64px;color:var(--stair-dark);letter-spacing:8px;display:flex;align-items:center;justify-content:center;width:100%;height:100%;}
+.detail-meta{padding-top:10px;}
+.detail-year{font-size:14px;color:var(--accent);letter-spacing:4px;margin-bottom:12px;font-weight:300;}
+.detail-title{font-size:clamp(24px,3.5vw,40px);font-weight:200;letter-spacing:2px;color:var(--stair-light);margin-bottom:14px;line-height:1.3;}
+.detail-artist{font-size:14px;color:var(--text-dim);letter-spacing:2px;margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--glass-border);}
+.detail-tags{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:30px;}
+.detail-tags .tag{font-size:11px;padding:5px 14px;}
+.detail-link{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;background:rgba(154,138,106,0.1);border:1px solid rgba(154,138,106,0.25);color:var(--accent);text-decoration:none;font-size:12px;letter-spacing:2px;border-radius:2px;transition:all 0.3s;}
+.detail-link:hover{background:rgba(154,138,106,0.2);border-color:rgba(154,138,106,0.5);transform:translateX(4px);}
+.detail-content section{margin-bottom:50px;max-width:820px;}
+.detail-content h2{font-size:13px;font-weight:400;letter-spacing:5px;text-transform:uppercase;color:var(--accent);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--glass-border);}
+.detail-content p{font-size:14px;line-height:2;color:var(--text-primary);letter-spacing:0.5px;opacity:0.85;white-space:pre-wrap;}
+
+#page-log{max-width:900px;margin:0 auto;}
+.log-header{margin-bottom:50px;padding-bottom:30px;border-bottom:1px solid var(--glass-border);}
+.log-year-display{font-size:16px;color:var(--accent);letter-spacing:8px;margin-bottom:14px;font-weight:300;}
+.log-title-display{font-size:clamp(24px,4vw,42px);font-weight:200;letter-spacing:4px;color:var(--stair-light);margin-bottom:24px;line-height:1.3;}
+.log-actions{display:flex;gap:12px;flex-wrap:wrap;}
+.log-actions button{padding:10px 26px;font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:2px;font-family:inherit;transition:all 0.3s;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-dim);}
+.log-actions button:hover{color:var(--stair-light);border-color:rgba(200,200,210,0.3);background:rgba(200,200,210,0.08);}
+.log-actions #logSaveBtn{background:rgba(154,138,106,0.15);border-color:rgba(154,138,106,0.35);color:var(--accent);}
+.log-actions #logSaveBtn:hover{background:rgba(154,138,106,0.28);border-color:rgba(154,138,106,0.6);}
+.log-actions #logDeleteBtn{color:#a06060;border-color:rgba(160,96,96,0.3);background:rgba(160,96,96,0.08);}
+.log-actions #logDeleteBtn:hover{background:rgba(160,96,96,0.2);border-color:rgba(160,96,96,0.6);color:#d08080;}
+.log-content{min-height:400px;}
+.log-display{font-size:15px;line-height:2.2;color:var(--text-primary);letter-spacing:0.5px;white-space:pre-wrap;opacity:0.9;}
+.log-editor{width:100%;min-height:500px;padding:24px;background:var(--glass);border:1px solid rgba(200,200,210,0.2);border-radius:3px;color:var(--text-primary);font-size:15px;line-height:2.2;letter-spacing:0.5px;font-family:inherit;resize:vertical;outline:none;transition:border-color 0.3s;}
+.log-editor:focus{border-color:rgba(200,200,210,0.4);}
+.log-input{width:100%;padding:14px 20px;background:var(--glass);border:1px solid rgba(200,200,210,0.2);border-radius:3px;color:var(--text-primary);font-size:15px;font-family:inherit;letter-spacing:2px;outline:none;transition:border-color 0.3s;margin-bottom:16px;}
+.log-input:focus{border-color:rgba(200,200,210,0.4);}
+.log-input.year-input{font-size:16px;letter-spacing:8px;color:var(--accent);}
+.log-input.title-input{font-size:22px;font-weight:200;letter-spacing:3px;}
+
+#page-edit{max-width:900px;margin:0 auto;}
+.edit-form{display:flex;flex-direction:column;gap:8px;}
+.edit-form label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim);margin-top:14px;margin-bottom:-4px;}
+.edit-form input,.edit-form textarea,.edit-form select{width:100%;padding:14px 20px;background:var(--glass);border:1px solid rgba(200,200,210,0.2);border-radius:3px;color:var(--text-primary);font-size:14px;font-family:inherit;letter-spacing:1px;outline:none;transition:border-color 0.3s;}
+.edit-form input:focus,.edit-form textarea:focus,.edit-form select:focus{border-color:rgba(200,200,210,0.4);}
+.edit-form textarea{min-height:180px;line-height:1.8;resize:vertical;}
+.edit-form select{cursor:pointer;}
+.edit-form select option{background:#12121a;color:var(--text-primary);}
+.edit-form-actions{display:flex;gap:12px;margin-top:30px;}
+.edit-form-actions button{padding:12px 30px;font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer;border-radius:2px;font-family:inherit;transition:all 0.3s;background:var(--glass);border:1px solid var(--glass-border);color:var(--text-dim);}
+.edit-form-actions button.primary{background:rgba(154,138,106,0.2);border-color:rgba(154,138,106,0.5);color:var(--accent);}
+.edit-form-actions button.primary:hover{background:rgba(154,138,106,0.35);border-color:rgba(154,138,106,0.8);}
+.edit-form-actions button:hover:not(.primary){color:var(--stair-light);border-color:rgba(200,200,210,0.3);background:rgba(200,200,210,0.08);}
+
+#page-mind{max-width:1200px;margin:0 auto;}
+.mind-container{position:relative;width:100%;min-height:600px;display:flex;justify-content:center;align-items:center;}
+.mind-svg{width:100%;height:auto;max-height:80vh;}
+.mind-svg text{font-family:'Helvetica Neue',Arial,'Noto Sans SC',sans-serif;fill:var(--text-dim);font-size:11px;}
+.mind-svg .node-center{fill:var(--stair-light);font-size:14px;letter-spacing:4px;font-weight:300;}
+.mind-svg .node-main{fill:var(--stair-light);font-size:12px;letter-spacing:2px;}
+.mind-svg .node-leaf{font-size:10px;}
+.mind-svg line,.mind-svg path{stroke:rgba(200,200,210,0.15);stroke-width:1;fill:none;}
+
+footer{position:relative;z-index:2;text-align:center;padding:40px;font-size:11px;color:var(--text-dim);letter-spacing:2px;}
+
+@media(max-width:900px){.detail-hero{grid-template-columns:1fr;gap:30px;}.detail-image{position:static;}}
+@media(max-width:768px){
+  nav{padding:12px 20px;}.nav-links{gap:14px;}.nav-links a{font-size:10px;letter-spacing:1px;}
+  .page{padding:80px 20px 40px;}
+  .stair-step{width:150px;height:20px;margin-left:-75px;margin-top:-10px;}
+  .stair-step .face-top{height:64px;}
+  .stair-step .face-front{height:20px;transform:translateZ(-64px);}
+  .stair-step .face-side{width:64px;height:20px;transform:translateZ(-32px) translateX(-32px) rotateY(-90deg);}
+  .stair-label{left:100%;margin-left:8px;font-size:9px;padding:3px 8px;letter-spacing:1px;}
+  .work-grid{grid-template-columns:1fr;}
+  .hero-title h1{letter-spacing:6px;}.hero-title p{letter-spacing:3px;font-size:10px;}
+  .add-node-btn{bottom:20px;right:20px;padding:10px 18px;font-size:10px;}
+  #musicToggle{bottom:20px;left:20px;width:44px;height:44px;font-size:16px;}
+}
+</style>
+</head>
+<body>
+
+<canvas id="cosmos"></canvas>
+<div class="nebula nebula-1"></div>
+<div class="nebula nebula-2"></div>
+<div class="nebula nebula-3"></div>
+
+<nav>
+  <div class="nav-logo">Revolving Door</div>
+  <div class="nav-links">
+    <a onclick="showPage('home')">时间</a>
+    <a onclick="showPage('index')">索引</a>
+    <a onclick="showPage('mind')">体系</a>
+  </div>
+</nav>
+
+<!-- 背景音乐按钮 -->
+<button id="musicToggle" onclick="toggleMusic()" title="播放/暂停背景音乐：Bauhaus - Bela Lugosi's Dead">
+  <span id="musicIcon">♫</span>
+</button>
+
+<!-- 隐藏的 YouTube 播放器 -->
+<div id="musicPlayer" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;overflow:hidden;">
+  <iframe id="ytPlayer"
+    src="https://www.youtube.com/embed/LflLL7AH-eo?enablejsapi=1&loop=1&playlist=LflLL7AH-eo&autoplay=0&controls=0&modestbranding=1"
+    allow="autoplay"
+    frameborder="0">
+  </iframe>
+</div>
+
+<div class="page" id="page-home">
+  <div class="hero-title">
+    <h1>Revolving Door</h1>
+    <p>The emerging universe rotating time</p>
+  </div>
+  <div class="stair-scene" id="stairScene">
+    <div class="stair-glow"></div>
+    <div class="stair-pivot" id="stairPivot"></div>
+  </div>
+  <button class="add-node-btn" onclick="addNode()">+ 添加节点</button>
+</div>
+
+<div class="page" id="page-index">
+  <div class="index-header">
+    <div>
+      <h2>Index</h2>
+      <p>媒介 × 文化理论 × 作品案例 交叉索引</p>
+    </div>
+    <button class="add-art-btn" onclick="openArtworkEditor(-1)">+ 添加作品</button>
+  </div>
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-btn active" data-filter="all">全部</button>
+    <button class="filter-btn" data-filter="平面类">平面类</button>
+    <button class="filter-btn" data-filter="视频类">视频类</button>
+    <button class="filter-btn" data-filter="文字类">文字类</button>
+    <button class="filter-btn" data-filter="游戏类">游戏类</button>
+    <button class="filter-btn" data-filter="戏剧类">戏剧类</button>
+    <button class="filter-btn" data-filter="音乐类">音乐类</button>
+    <button class="filter-btn" data-filter="装置艺术类">装置艺术类</button>
+    <button class="filter-btn" data-filter="舞台艺术类">舞台艺术类</button>
+    <button class="filter-btn" data-filter="数字化艺术类">数字化艺术类</button>
+    <button class="filter-btn" data-filter="超现实主义">超现实主义</button>
+    <button class="filter-btn" data-filter="观念艺术">观念艺术</button>
+    <button class="filter-btn" data-filter="象征主义">象征主义</button>
+    <button class="filter-btn" data-filter="神秘主义">神秘主义</button>
+    <button class="filter-btn" data-filter="哥特文化">哥特文化</button>
+    <button class="filter-btn" data-filter="朋克文化">朋克文化</button>
+    <button class="filter-btn" data-filter="亚文化">亚文化</button>
+    <button class="filter-btn" data-filter="当代艺术">当代艺术</button>
+  </div>
+  <div class="search-wrap">
+    <input type="text" id="searchInput" placeholder="搜索作品、艺术家、标签...">
+  </div>
+  <div class="work-grid" id="workGrid"></div>
+</div>
+
+<div class="page" id="page-detail">
+  <div class="detail-back">
+    <button onclick="showPage('index')">← 返回索引</button>
+    <button class="edit-btn" onclick="openArtworkEditor(currentDetailIndex)">编辑作品</button>
+    <button class="danger" onclick="deleteArtwork()">删除作品</button>
+  </div>
+  <div class="detail-hero">
+    <div class="detail-image" id="detailImageWrap">
+      <img id="detailImg" src="" alt="">
+      <div class="img-placeholder" id="detailImgPlaceholder" style="display:none">◆</div>
+    </div>
+    <div class="detail-meta">
+      <div class="detail-year" id="detailYear"></div>
+      <h1 class="detail-title" id="detailTitle"></h1>
+      <div class="detail-artist" id="detailArtist"></div>
+      <div class="detail-tags" id="detailTags"></div>
+      <a class="detail-link" id="detailLink" target="_blank" rel="noopener">查看作品网站 →</a>
+    </div>
+  </div>
+  <div class="detail-content">
+    <section><h2>作品描述</h2><p id="detailDesc"></p></section>
+    <section><h2>艺术家 / 作者介绍</h2><p id="detailArtistInfo"></p></section>
+    <section><h2>媒介与理论</h2><p id="detailTheoryText"></p></section>
+  </div>
+</div>
+
+<div class="page" id="page-log">
+  <div class="detail-back">
+    <button onclick="showPage('home')">← 返回楼梯</button>
+  </div>
+  <div class="log-header">
+    <div class="log-year-display" id="logYearDisplay"></div>
+    <h1 class="log-title-display" id="logTitleDisplay"></h1>
+    <div class="log-actions">
+      <button id="logEditBtn" onclick="toggleLogEdit()">编辑</button>
+      <button id="logSaveBtn" style="display:none" onclick="saveLogContent()">保存</button>
+      <button id="logDeleteBtn" style="display:none" onclick="deleteCurrentNode()">删除此节点</button>
+    </div>
+  </div>
+  <div class="log-content">
+    <div class="log-display" id="logDisplay"></div>
+    <div id="logEditorWrap" style="display:none">
+      <input class="log-input year-input" id="logYearInput" placeholder="年份（如 2024）">
+      <input class="log-input title-input" id="logTitleInput" placeholder="标题">
+      <textarea class="log-editor" id="logEditor" placeholder="记录你的学习、创作与研究..."></textarea>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-edit">
+  <div class="detail-back">
+    <button onclick="cancelArtworkEdit()">← 取消</button>
+  </div>
+  <div class="index-header">
+    <div>
+      <h2 id="editPageTitle">添加作品</h2>
+      <p>填写作品信息，保存后即可在索引中查看</p>
+    </div>
+  </div>
+  <div class="edit-form">
+    <label>作品名称</label>
+    <input id="editTitle" placeholder="作品名称">
+    <label>艺术家 / 作者</label>
+    <input id="editArtist" placeholder="艺术家 / 作者">
+    <label>年份</label>
+    <input id="editYear" placeholder="如 1931">
+    <label>媒介类别</label>
+    <select id="editMedium">
+      <option>平面类</option>
+      <option>视频类</option>
+      <option>文字类</option>
+      <option>游戏类</option>
+      <option>戏剧类</option>
+      <option>音乐类</option>
+      <option>装置艺术类</option>
+      <option>舞台艺术类</option>
+      <option>数字化艺术类</option>
+    </select>
+    <label>理论标签（用逗号分隔）</label>
+    <input id="editTheory" placeholder="如：超现实主义, 无意识">
+    <label>作品描述</label>
+    <textarea id="editDesc" placeholder="作品描述..."></textarea>
+    <label>艺术家 / 作者介绍</label>
+    <textarea id="editArtistInfo" placeholder="艺术家介绍..."></textarea>
+    <label>作品链接</label>
+    <input id="editUrl" placeholder="https://...">
+    <label>图片 URL（可选）</label>
+    <input id="editImg" placeholder="https://...">
+    <div class="edit-form-actions">
+      <button class="primary" onclick="saveArtworkEdit()">保存</button>
+      <button onclick="cancelArtworkEdit()">取消</button>
+    </div>
+  </div>
+</div>
+
+<div class="page" id="page-mind">
+  <div class="index-header">
+    <div>
+      <h2>Mind Map</h2>
+      <p>媒介、理论、作品的关联体系</p>
+    </div>
+  </div>
+  <div class="mind-container">
+    <svg class="mind-svg" viewBox="0 0 1000 700" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="500" cy="350" r="52" fill="none" stroke="rgba(200,200,210,0.25)" stroke-width="1.5"/>
+      <circle cx="500" cy="350" r="46" fill="rgba(200,200,210,0.04)"/>
+      <text x="500" y="355" text-anchor="middle" class="node-center">核心</text>
+      <g>
+        <path d="M500,350 Q320,200 200,120" stroke="rgba(200,200,210,0.12)"/>
+        <circle cx="200" cy="120" r="32" fill="rgba(154,138,106,0.08)" stroke="rgba(154,138,106,0.2)"/>
+        <text x="200" y="125" text-anchor="middle" class="node-main">平面类</text>
+        <text x="120" y="90" class="node-leaf">插画</text>
+        <text x="80" y="110" class="node-leaf">平面设计</text>
+        <text x="70" y="130" class="node-leaf">油画/水彩/水墨</text>
+        <path d="M500,350 Q400,180 350,100" stroke="rgba(200,200,210,0.12)"/>
+        <circle cx="350" cy="100" r="30" fill="rgba(154,138,106,0.08)" stroke="rgba(154,138,106,0.2)"/>
+        <text x="350" y="105" text-anchor="middle" class="node-main">视频类</text>
+        <text x="290" y="60" class="node-leaf">实验动画</text>
+        <text x="290" y="80" class="node-leaf">影像/电影</text>
+        <path d="M500,350 Q490,160 470,80" stroke="rgba(200,200,210,0.12)"/>
+        <circle cx="470" cy="80" r="30" fill="rgba(154,138,106,0.08)" stroke="rgba(154,138,106,0.2)"/>
+        <text x="470" y="85" text-anchor="middle" class="node-main">文字类</text>
+        <text x="420" y="40" class="node-leaf">小说/诗歌</text>
+        <text x="500" y="40" class="node-leaf">文学</text>
+        <path d="M500,350 Q560,160 600,80" stroke="rgba(200,200,210,0.12)"/>
+        <circle cx="600" cy="80" r="30" fill="rgba(154,138,106,0.08)" stroke="rgba(154,138,106,0.2)"/>
+        <text x="600" y="85" text-anchor="middle" class="node-main">游戏类</text>
+        <text x="560" y="40" class="node-leaf">独立游戏</text>
+        <text x="630" y="40" class="node-leaf">叙事游戏</text>
+        <path d="M500,350 Q650,180 700,100" stroke="rgba(200,200,210,0.12)"/>
+        <circle cx="700" cy="100" r="30" fill="rgba(154,138,106,0.08)" stroke="rgba(154,138,106,0.2)"/>
+        <text x="700" y="105" text-anchor="middle" class="node-main">装置类</text>
+        <text x="660" y="60" class="node-leaf">空间装置</text>
+        <text x="740" y="60" class="node-leaf">光装置</text>
+        <path d="M500,350 Q720,220 800,160" stroke="rgba(200,200,210,0.12)"/>
+        <circle cx="800" cy="160" r="30" fill="rgba(154,138,106,0.08)" stroke="rgba(154,138,106,0.2)"/>
+        <text x="800" y="165" text-anchor="middle" class="node-main">数字化</text>
+        <text x="770" y="120" class="node-leaf">新媒体</text>
+        <text x="840" y="120" class="node-leaf">生成艺术</text>
+      </g>
+      <g>
+        <path d="M500,350 Q320,500 200,580" stroke="rgba(100,120,160,0.15)"/>
+        <circle cx="200" cy="580" r="32" fill="rgba(100,120,160,0.08)" stroke="rgba(100,120,160,0.2)"/>
+        <text x="200" y="585" text-anchor="middle" class="node-main">超现实主义</text>
+        <text x="100" y="620" class="node-leaf">无意识</text>
+        <text x="130" y="640" class="node-leaf">梦境</text>
+        <path d="M500,350 Q450,520 400,610" stroke="rgba(100,120,160,0.15)"/>
+        <circle cx="400" cy="610" r="30" fill="rgba(100,120,160,0.08)" stroke="rgba(100,120,160,0.2)"/>
+        <text x="400" y="615" text-anchor="middle" class="node-main">观念艺术</text>
+        <text x="360" y="650" class="node-leaf">现成品</text>
+        <text x="430" y="650" class="node-leaf">体制批判</text>
+        <path d="M500,350 Q540,530 580,620" stroke="rgba(100,120,160,0.15)"/>
+        <circle cx="580" cy="620" r="30" fill="rgba(100,120,160,0.08)" stroke="rgba(100,120,160,0.2)"/>
+        <text x="580" y="625" text-anchor="middle" class="node-main">象征主义</text>
+        <text x="540" y="660" class="node-leaf">神话</text>
+        <text x="610" y="660" class="node-leaf">死亡</text>
+        <path d="M500,350 Q650,500 700,580" stroke="rgba(100,120,160,0.15)"/>
+        <circle cx="700" cy="580" r="30" fill="rgba(100,120,160,0.08)" stroke="rgba(100,120,160,0.2)"/>
+        <text x="700" y="585" text-anchor="middle" class="node-main">神秘主义</text>
+        <text x="660" y="620" class="node-leaf">塔罗/占星</text>
+        <text x="740" y="620" class="node-leaf">炼金术</text>
+        <path d="M500,350 Q800,480 850,560" stroke="rgba(100,120,160,0.15)"/>
+        <circle cx="850" cy="560" r="30" fill="rgba(100,120,160,0.08)" stroke="rgba(100,120,160,0.2)"/>
+        <text x="850" y="565" text-anchor="middle" class="node-main">哥特/朋克</text>
+        <text x="810" y="600" class="node-leaf">黑暗美学</text>
+        <text x="890" y="600" class="node-leaf">反叛</text>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<footer>Revolving Door — Personal Knowledge Base</footer>
+
+<script>
+/* ============================================================
+   背景音乐（Bauhaus - Bela Lugosi's Dead）
+   ============================================================ */
+let ytPlayerReady = false;
+let musicPlaying = false;
+
+(function loadYTAPI(){
+  if(window.YT && window.YT.Player) return;
+  const tag = document.createElement('script');
+  tag.src = 'https://www.youtube.com/iframe_api';
+  document.head.appendChild(tag);
+})();
+
+window.onYouTubeIframeAPIReady = function(){
+  new YT.Player('ytPlayer', {
+    events: {
+      'onReady': function(event){
+        ytPlayerReady = true;
+        event.target.setVolume(25);
+      },
+      'onStateChange': function(event){
+        if(event.data === YT.PlayerState.ENDED){
+          event.target.playVideo();
+        }
+      }
+    }
+  });
+};
+
+function toggleMusic(){
+  const btn = document.getElementById('musicToggle');
+  if(!ytPlayerReady){
+    console.log('播放器尚未就绪，请稍候...');
+    return;
+  }
+  const player = YT.get('ytPlayer');
+  if(!player) return;
+
+  if(musicPlaying){
+    player.pauseVideo();
+    musicPlaying = false;
+    btn.classList.remove('playing');
+  }else{
+    player.playVideo();
+    player.setVolume(25);
+    musicPlaying = true;
+    btn.classList.add('playing');
+  }
+}
+
+/* ============================================================
+   宇宙粒子背景
+   ============================================================ */
+(function(){
+  const canvas=document.getElementById('cosmos');
+  const ctx=canvas.getContext('2d');
+  let W,H,particles=[];
+  function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
+  resize();window.addEventListener('resize',resize);
+  class P{
+    constructor(){this.reset();this.y=Math.random()*H;}
+    reset(){this.x=Math.random()*W;this.y=-10;this.size=Math.random()*1.8+0.3;this.speed=Math.random()*0.3+0.08;this.opacity=Math.random()*0.5+0.1;this.drift=(Math.random()-0.5)*0.15;}
+    update(){this.y+=this.speed;this.x+=this.drift;if(this.y>H+10){this.reset();this.y=-10;}}
+    draw(){ctx.beginPath();ctx.arc(this.x,this.y,this.size,0,Math.PI*2);ctx.fillStyle=`rgba(200,200,220,${this.opacity})`;ctx.fill();}
+  }
+  for(let i=0;i<160;i++) particles.push(new P());
+  (function loop(){ctx.clearRect(0,0,W,H);particles.forEach(p=>{p.update();p.draw();});requestAnimationFrame(loop);})();
+})();
+
+/* ============================================================
+   楼梯数据（默认 14 个空节点）
+   ============================================================ */
+const STAIR_KEY='rd-stairs-v2';
+const DEFAULT_STAIR_COUNT=14;
+function loadStairEntries(){
+  try{
+    const s=localStorage.getItem(STAIR_KEY);
+    if(s){const a=JSON.parse(s);if(Array.isArray(a)&&a.length>0)return a.map((e,i)=>({id:e.id||'s'+Date.now()+'_'+i,year:e.year||'',title:e.title||'',log:e.log||''}));}
+  }catch(e){}
+  const arr=[];
+  for(let i=0;i<DEFAULT_STAIR_COUNT;i++) arr.push({id:'s'+i+'_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),year:'',title:'',log:''});
+  return arr;
+}
+let stairEntries=loadStairEntries();
+function saveStairEntries(){try{localStorage.setItem(STAIR_KEY,JSON.stringify(stairEntries));}catch(e){}}
+
+/* 楼梯渲染 */
+const pivot=document.getElementById('stairPivot');
+const scene=document.getElementById('stairScene');
+const RADIUS=170, VERT_STEP=42;
+let offsetY=0, autoAngle=0, mouseAngle=0, targetAutoSpeed=0.1, currentAutoSpeed=targetAutoSpeed;
+
+function renderStair(){
+  pivot.innerHTML='';
+  const N=stairEntries.length;
+  const ANGLE_STEP=360/Math.max(N,8);
+  const TOTAL_HEIGHT=(N-1)*VERT_STEP;
+  offsetY=TOTAL_HEIGHT*0.45;
+  for(let i=0;i<N;i++){
+    const entry=stairEntries[i];
+    const step=document.createElement('div');
+    step.className='stair-step';
+    const isEmpty=!entry.year && !entry.title;
+    if(isEmpty) step.classList.add('empty');
+    const angle=i*ANGLE_STEP;
+    const rad=angle*Math.PI/180;
+    const x=Math.cos(rad)*RADIUS, z=Math.sin(rad)*RADIUS, y=-i*VERT_STEP;
+    step.style.transform=`translate3d(${x}px,${y}px,${z}px) rotateY(${-angle}deg)`;
+    let labelText;
+    if(isEmpty) labelText='● 未命名节点';
+    else if(entry.year&&entry.title) labelText=`${entry.year} · ${entry.title}`;
+    else labelText=entry.year||entry.title;
+    step.innerHTML=`<div class="face-top"></div><div class="face-front"></div><div class="face-side"></div><div class="stair-label">${labelText}</div>`;
+    step.addEventListener('click',()=>openLog(entry.id));
+    pivot.appendChild(step);
+  }
+}
+function addNode(){
+  const newEntry={id:'s_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),year:'',title:'',log:''};
+  stairEntries.push(newEntry);
+  saveStairEntries();
+  renderStair();
+  openLog(newEntry.id);
+  toggleLogEdit();
+}
+scene.addEventListener('mousemove',(e)=>{
+  const r=scene.getBoundingClientRect();
+  mouseAngle=((e.clientX-r.left)/r.width-0.5)*70;
+  currentAutoSpeed=0;
+});
+scene.addEventListener('mouseleave',()=>{mouseAngle=0;currentAutoSpeed=targetAutoSpeed;});
+(function loop(){
+  currentAutoSpeed+=(targetAutoSpeed-currentAutoSpeed)*0.03;
+  autoAngle+=currentAutoSpeed;
+  pivot.style.transform=`translateY(${offsetY}px) rotateX(20deg) rotateY(${autoAngle+mouseAngle}deg)`;
+  requestAnimationFrame(loop);
+})();
+
+/* 日志 */
+let currentLogId=null;
+function openLog(id){
+  const entry=stairEntries.find(e=>e.id===id);
+  if(!entry) return;
+  currentLogId=id;
+  document.getElementById('logYearDisplay').textContent=entry.year||'（未填写年份）';
+  document.getElementById('logTitleDisplay').textContent=entry.title||'（未命名节点）';
+  const d=document.getElementById('logDisplay');
+  d.textContent=entry.log||'还没有记录。点击"编辑"开始书写。';
+  d.style.display='';
+  document.getElementById('logEditorWrap').style.display='none';
+  document.getElementById('logEditBtn').style.display='';
+  document.getElementById('logSaveBtn').style.display='none';
+  document.getElementById('logDeleteBtn').style.display='none';
+  showPage('log');
+}
+function toggleLogEdit(){
+  const entry=stairEntries.find(e=>e.id===currentLogId);
+  if(!entry) return;
+  document.getElementById('logYearInput').value=entry.year||'';
+  document.getElementById('logTitleInput').value=entry.title||'';
+  document.getElementById('logEditor').value=entry.log||'';
+  document.getElementById('logDisplay').style.display='none';
+  document.getElementById('logEditorWrap').style.display='';
+  document.getElementById('logEditBtn').style.display='none';
+  document.getElementById('logSaveBtn').style.display='';
+  document.getElementById('logDeleteBtn').style.display='';
+  document.getElementById('logYearInput').focus();
+}
+function saveLogContent(){
+  const entry=stairEntries.find(e=>e.id===currentLogId);
+  if(!entry) return;
+  entry.year=document.getElementById('logYearInput').value.trim();
+  entry.title=document.getElementById('logTitleInput').value.trim();
+  entry.log=document.getElementById('logEditor').value;
+  saveStairEntries();
+  renderStair();
+  openLog(currentLogId);
+}
+function deleteCurrentNode(){
+  if(!currentLogId) return;
+  if(stairEntries.length<=1){alert('至少保留一个节点。');return;}
+  if(!confirm('确定删除这个节点吗？')) return;
+  stairEntries=stairEntries.filter(e=>e.id!==currentLogId);
+  saveStairEntries();
+  renderStair();
+  showPage('home');
+}
+
+/* 页面切换 */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const t=document.getElementById('page-'+id);
+  if(t) t.classList.add('active');
+  window.scrollTo(0,0);
+  const addBtn=document.querySelector('.add-node-btn');
+  if(addBtn) addBtn.style.display=(id==='home')?'':'none';
+}
+
+/* 作品数据 */
+const ART_KEY='rd-artworks-v1';
+const DEFAULT_ARTWORKS=[
+  {title:'记忆的永恒',artist:'萨尔瓦多·达利',year:'1931',medium:'平面类',theory:['超现实主义','无意识'],desc:'画面中融化的钟表呈现凄凉而漫无边际的梦境。达利以"最不容辩驳的精确性"对混乱进行秩序化。',artistInfo:'萨尔瓦多·达利（1904-1989），西班牙超现实主义代表画家。',url:'https://www.moma.org/collection/works/79018',img:'https://upload.wikimedia.org/wikipedia/en/d/dd/The_Persistence_of_Memory.jpg'},
+  {title:'形象的背叛',artist:'雷内·马格利特',year:'1929',medium:'平面类',theory:['超现实主义','语言与图像'],desc:'一支烟斗旁写着"这不是一支烟斗"，挑战图像与语言之间的指涉关系。',artistInfo:'雷内·马格利特（1898-1967），比利时超现实主义画家。',url:'https://www.lacma.org/art/exhibition/magritte',img:'https://upload.wikimedia.org/wikipedia/en/b/b6/MagrittePipe.jpg'},
+  {title:'独眼巨人',artist:'奥迪隆·雷东',year:'1914',medium:'平面类',theory:['象征主义','神秘主义'],desc:'雷东以夸张、怪诞、隐秘、梦幻的表现形式描绘独眼巨人库克罗普斯从山后窥视沉睡的伽拉忒亚。',artistInfo:'奥迪隆·雷东（1840-1916），法国象征主义画家。',url:'https://krollermuller.nl/en/odilon-redon',img:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Odilon_Redon_-_The_Cyclops_-_Google_Art_Project.jpg/440px-Odilon_Redon_-_The_Cyclops_-_Google_Art_Project.jpg'},
+  {title:'死之岛',artist:'阿诺德·勃克林',year:'1880',medium:'平面类',theory:['象征主义','死亡'],desc:'一艘载着棺木的小船驶向孤岛，柏树环绕的岩壁如冥界入口。',artistInfo:'阿诺德·勃克林（1827-1901），瑞士象征主义画家。',url:'https://www.kunstmuseumbasel.ch/en/collection',img:'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Arnold_B%C3%B6cklin_-_Die_Toteninsel_III_%28Alte_Nationalgalerie%2C_Berlin%29.jpg/440px-Arnold_B%C3%B6cklin_-_Die_Toteninsel_III_%28Alte_Nationalgalerie%2C_Berlin%29.jpg'},
+  {title:'在希律王前跳舞的莎乐美',artist:'古斯塔夫·莫罗',year:'1876',medium:'平面类',theory:['象征主义','神话'],desc:'莫罗为传统莎乐美像添上"致命女性"的要素。',artistInfo:'古斯塔夫·莫罗（1826-1898），法国象征主义画家。',url:'https://musee-moreau.fr/',img:''},
+  {title:'吉斯蒙达海报',artist:'阿尔丰斯·穆夏',year:'1894',medium:'平面类',theory:['象征主义','新艺术'],desc:'以装饰性线条和理想化女性形象定义了新艺术运动的视觉语言。',artistInfo:'阿尔丰斯·穆夏（1860-1939），捷克新艺术运动画家。',url:'https://www.mucha.cz/',img:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/Alphonse_Mucha_-_Gismonda_-_1894.jpg/440px-Alphonse_Mucha_-_Gismonda_-_1894.jpg'},
+  {title:'摩尔海报',artist:'亨利克·托马耶夫斯基',year:'1959',medium:'平面类',theory:['观念艺术','极简'],desc:'以摩尔雕塑特征创作海报上的字母剪贴设计，是波兰海报学派代表作。',artistInfo:'亨利克·托马耶夫斯基（1914-2005），波兰海报学派代表人物。',url:'https://www.postermuseum.pl/',img:''},
+  {title:'Tripping Corpse系列',artist:'雷蒙德·佩蒂伯恩',year:'1980s',medium:'平面类',theory:['朋克文化','亚文化'],desc:'以锐利的美国社会讽刺肖像著称，是加州朋克摇滚视觉的核心人物。',artistInfo:'雷蒙德·佩蒂伯恩（1957- ），美国艺术家。',url:'https://www.cnap.fr/raymond-pettibon',img:''},
+  {title:'无题（Ramona）',artist:'奈良美智',year:'2007',medium:'平面类',theory:['朋克文化','亚文化'],desc:'人物形象源于奈良最喜爱的朋克乐队 The Ramones。',artistInfo:'奈良美智（1959- ），日本艺术家。',url:'https://www.christies.com/',img:''},
+  {title:'两个弗里达',artist:'弗里达·卡罗',year:'1939',medium:'平面类',theory:['超现实主义','身份'],desc:'两个自我并置，探索身份分裂、殖民经验与自我认同。',artistInfo:'弗里达·卡罗（1907-1954），墨西哥画家。',url:'https://museodemoderno.inba.gob.mx/',img:''},
+  {title:'宇宙堪舆系列',artist:'古静',year:'2026',medium:'平面类',theory:['玄学','易经'],desc:'以《易经》卦象重构当代抽象绘画。',artistInfo:'古静，中国当代艺术家。',url:'https://news.artron.net/',img:''},
+  {title:'龙虾电话',artist:'萨尔瓦多·达利',year:'1936',medium:'装置艺术类',theory:['超现实主义','现成品'],desc:'通过改变日常物品赋予其新的象征意义。',artistInfo:'萨尔瓦多·达利（1904-1989），西班牙超现实主义代表画家。',url:'https://www.tate.org.uk/art/artworks/dali-lobster-telephone-t03257',img:'https://upload.wikimedia.org/wikipedia/en/thumb/0/0e/Lobster_Telephone.jpg/440px-Lobster_Telephone.jpg'},
+  {title:'一把和三把椅子',artist:'约瑟夫·科苏斯',year:'1965',medium:'装置艺术类',theory:['观念艺术','语言'],desc:'由一把真实的椅子、一张照片、一张辞典解释招贴并置，追问"什么是一把椅子"。',artistInfo:'约瑟夫·科苏斯（1945- ），美国观念艺术家。',url:'https://www.moma.org/collection/works/81631',img:'https://upload.wikimedia.org/wikipedia/en/thumb/0/0e/One_and_Three_Chairs.jpg/440px-One_and_Three_Chairs.jpg'},
+  {title:'世界基座',artist:'皮耶罗·曼佐尼',year:'1961',medium:'装置艺术类',theory:['观念艺术','现成品'],desc:'将整个宇宙请入画廊，是对艺术疆界的挑衅。',artistInfo:'皮耶罗·曼佐尼（1933-1963），意大利前卫艺术家。',url:'https://gagosian.com/artists/piero-manzoni/',img:''},
+  {title:'天气计划',artist:'奥拉维尔·埃利亚松',year:'2003',medium:'装置艺术类',theory:['当代艺术','光'],desc:'在泰特现代美术馆涡轮大厅展出的半轮巨大黄色"太阳"。',artistInfo:'奥拉维尔·埃利亚松（1967- ），丹麦-冰岛艺术家。',url:'https://www.tate.org.uk/whats-on/exhibition/weather-project',img:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/17/Olafur_Eliasson_The_weather_project.jpg/440px-Olafur_Eliasson_The_weather_project.jpg'},
+  {title:'蛇塔',artist:'黄永砯',year:'2009',medium:'装置艺术类',theory:['观念艺术','东方哲学'],desc:'以蛇的骨架为主题做塔状装置。',artistInfo:'黄永砯（1954-2019），中国当代艺术家。',url:'https://www.moma.org/artists/6785',img:''},
+  {title:'游泳池',artist:'雷安德罗·埃利希',year:'2004',medium:'装置艺术类',theory:['超现实主义','当代艺术'],desc:'观众从下方仰视仿佛置身水下。',artistInfo:'雷安德罗·埃利希（1973- ），阿根廷观念艺术家。',url:'https://www.moma.org/calendar/exhibitions/4863',img:''},
+  {title:'幻奇宇宙系列',artist:'陈滢如',year:'2020s',medium:'装置艺术类',theory:['神秘主义','玄学'],desc:'结合占星、神圣几何、炼金术、灵修等神秘学元素。',artistInfo:'陈滢如，中国台湾当代艺术家。',url:'https://www.tfam.museum/',img:''},
+  {title:'技术神秘主义系列',artist:'苏珊娜·特里斯特',year:'2020s',medium:'装置艺术类',theory:['神秘主义','科技'],desc:'探索塔罗、占星、水晶、卡巴拉图在当代艺术中的新生。',artistInfo:'苏珊娜·特里斯特（1977- ），瑞士艺术家。',url:'https://suzannetreister.net/',img:''},
+  {title:'D11',artist:'维姆·德尔沃伊',year:'2009',medium:'装置艺术类',theory:['哥特文化','工艺'],desc:'将哥特式花窗的蕾丝图案重新绘制为激光切割的钢铁雕塑。',artistInfo:'维姆·德尔沃伊（1965- ），比利时艺术家。',url:'https://www.perrotin.com/artists/Wim_Delvoye/',img:''},
+  {title:'一棵橡树',artist:'迈克尔·克雷格-马丁',year:'1973',medium:'装置艺术类',theory:['观念艺术','语言'],desc:'一杯水放在玻璃架上，旁边文字写着"这是一棵橡树"。',artistInfo:'迈克尔·克雷格-马丁（1941- ），英国观念艺术家。',url:'https://www.tate.org.uk/art/artworks/craig-martin-an-oak-tree-t01786',img:''},
+  {title:'Opus I',artist:'沃尔特·鲁特曼',year:'1921',medium:'视频类',theory:['先锋','抽象动画'],desc:'油彩玻璃技术制作的先锋抽象动画，现代抽象动画的起点之一。',artistInfo:'沃尔特·鲁特曼（1887-1941），德国实验电影导演。',url:'https://www.filmportal.de/',img:''},
+  {title:'赋格曲',artist:'乔治·史威兹贝尔',year:'1998',medium:'视频类',theory:['实验动画','音乐性'],desc:'影像流动的美学形式与音乐紧密结合。',artistInfo:'乔治·史威兹贝尔（1944- ），瑞士实验动画导演。',url:'https://www.film.uzh.ch/',img:''},
+  {title:'双人舞',artist:'诺曼·麦克拉伦',year:'1968',medium:'视频类',theory:['实验动画','身体'],desc:'两名芭蕾舞者相拥共舞时产生的多重残影视觉效果。',artistInfo:'诺曼·麦克拉伦（1914-1987），加拿大动画大师。',url:'https://www.nfb.ca/',img:''},
+  {title:'镜子',artist:'安德烈·塔可夫斯基',year:'1975',medium:'视频类',theory:['诗意蒙太奇','电影'],desc:'塔可夫斯基的诗意蒙太奇将记忆、梦境与历史交织为高度的精神性影像。',artistInfo:'安德烈·塔可夫斯基（1932-1986），苏联电影导演。',url:'https://www.criterion.com/',img:''},
+  {title:'无界',artist:'TeamLab',year:'2018至今',medium:'数字化艺术类',theory:['新媒体艺术','沉浸式'],desc:'在6600平米展览空间展出约50件无边界艺术作品。',artistInfo:'TeamLab（2001- ），日本跨学科数字艺术团体。',url:'https://www.teamlab.art/',img:''},
+  {title:'大地回音',artist:'刘辰岫',year:'2025',medium:'数字化艺术类',theory:['新媒体艺术','生态'],desc:'以地震模组结合动力声响，反思人与自然的关系。',artistInfo:'刘辰岫，中国台湾新媒体艺术家。',url:'https://ars.electronica.art/',img:''},
+  {title:'理查三世',artist:'奥斯特玛雅 / 邵宾纳剧院',year:'2025',medium:'戏剧类',theory:['当代艺术','沉浸式'],desc:'仿照莎士比亚环球剧院对剧场进行改造。',artistInfo:'托马斯·奥斯特玛雅（1968- ），德国戏剧导演。',url:'https://www.schaubuehne.de/',img:''},
+  {title:'惊奇之诗',artist:'La Mula剧团',year:'2026',medium:'戏剧类',theory:['当代艺术','身体'],desc:'没有台词的当代剧场作品。',artistInfo:'La Mula剧团，西班牙先锋剧团。',url:'https://www.actfestival.com/',img:''},
+  {title:'小径分岔的花园',artist:'豪尔赫·路易斯·博尔赫斯',year:'1941',medium:'文字类',theory:['超现实主义','迷宫','时间'],desc:'一部侦探故事，同时也是一篇关于时间的哲学论文。',artistInfo:'豪尔赫·路易斯·博尔赫斯（1899-1986），阿根廷作家、诗人、翻译家，20世纪最具影响力的文学人物之一。',url:'https://www.penguinrandomhouse.com/books/29726/fictions-by-jorge-luis-borges/',img:''},
+  {title:'巴别图书馆',artist:'豪尔赫·路易斯·博尔赫斯',year:'1941',medium:'文字类',theory:['神秘主义','无限','语言'],desc:'宇宙被想象成一个由六边形房间组成的图书馆，包含所有可能的书籍。',artistInfo:'豪尔赫·路易斯·博尔赫斯（1899-1986），阿根廷作家。',url:'https://www.penguinrandomhouse.com/books/29726/fictions-by-jorge-luis-borges/',img:''},
+  {title:'环形废墟',artist:'豪尔赫·路易斯·博尔赫斯',year:'1941',medium:'文字类',theory:['超现实主义','梦','元叙事'],desc:'一个魔法师在梦中创造了一个人，最终意识到自己也是被另一个人梦中创造出来的。',artistInfo:'豪尔赫·路易斯·博尔赫斯（1899-1986），阿根廷作家。',url:'https://www.penguinrandomhouse.com/books/29726/fictions-by-jorge-luis-borges/',img:''},
+  {title:'厄舍府的倒塌',artist:'埃德加·爱伦·坡',year:'1839',medium:'文字类',theory:['哥特文化','恐怖','象征主义'],desc:'一座衰败的宅邸、它的主人，以及他妹妹的哥特式恐怖故事。',artistInfo:'埃德加·爱伦·坡（1809-1849），美国作家、诗人、文学评论家，被誉为"侦探小说之父"和"恐怖小说大师"。',url:'https://www.poemuseum.org/',img:''},
+  {title:'乌鸦',artist:'埃德加·爱伦·坡',year:'1845',medium:'文字类',theory:['哥特文化','象征主义','死亡'],desc:'一首关于失去、哀悼和一只会说话、只说"永不复焉"的乌鸦的诗。',artistInfo:'埃德加·爱伦·坡（1809-1849），美国作家、诗人。',url:'https://www.poetryfoundation.org/poems/48860/the-raven',img:''},
+  {title:'红死魔的面具',artist:'埃德加·爱伦·坡',year:'1842',medium:'文字类',theory:['哥特文化','象征主义'],desc:'关于死亡不可逃避的终极寓言。',artistInfo:'埃德加·爱伦·坡（1809-1849），美国作家。',url:'https://www.poetryfoundation.org/',img:''},
+  {title:'罪与罚',artist:'费奥多尔·陀思妥耶夫斯基',year:'1866',medium:'文字类',theory:['存在主义','心理学','宗教'],desc:'拉斯柯尼科夫为了证明自己"非凡人"的理论而杀人，却逐渐被罪恶感吞噬。',artistInfo:'费奥多尔·陀思妥耶夫斯基（1821-1881），俄国作家，被誉为"心理学小说之父"。',url:'https://www.penguinrandomhouse.com/books/28914/crime-and-punishment-by-fyodor-dostoevsky/',img:''},
+  {title:'卡拉马佐夫兄弟',artist:'费奥多尔·陀思妥耶夫斯基',year:'1880',medium:'文字类',theory:['存在主义','宗教','哲学'],desc:'一场弑父案与一场关于上帝、自由和道德的哲学辩论。',artistInfo:'费奥多尔·陀思妥耶夫斯基（1821-1881），俄国作家。',url:'https://www.penguinrandomhouse.com/books/28917/the-brothers-karamazov-by-fyodor-dostoevsky/',img:''},
+  {title:'鳄鱼街',artist:'布鲁诺·舒尔茨',year:'1934',medium:'文字类',theory:['超现实主义','神秘主义','变形'],desc:'一本短篇小说集，将童年记忆转化为一个神话世界。',artistInfo:'布鲁诺·舒尔茨（1892-1942），波兰作家、画家。二战期间被纳粹枪杀于德罗霍贝奇犹太隔离区。',url:'https://www.penguinrandomhouse.com/books/698025/the-street-of-crocodiles-by-bruno-schulz/',img:''},
+  {title:'肉桂色铺子',artist:'布鲁诺·舒尔茨',year:'1934',medium:'文字类',theory:['超现实主义','象征主义'],desc:'舒尔茨的代表作集，将一个小城的童年转化为一种神话地理。',artistInfo:'布鲁诺·舒尔茨（1892-1942），波兰作家、画家。',url:'https://www.penguinrandomhouse.com/books/698025/the-street-of-crocodiles-by-bruno-schulz/',img:''},
+  {title:'雨世界',artist:'Videocult',year:'2017',medium:'游戏类',theory:['生态','神秘主义','生存'],desc:'你是一只蛞蝓猫，在工业废墟的生态系统里努力求生。没有任务、没有文字、没有指引。',artistInfo:'Videocult，由 Joar Jakobsson 与 James Therrien 组成的独立游戏开发团队。',url:'https://rainworldgame.com/',img:''},
+  {title:'极乐迪斯科',artist:'ZA/UM',year:'2019',medium:'游戏类',theory:['观念艺术','政治','心理学'],desc:'你是一名患有失忆症的侦探，在一个衰败的后革命城市里醒来。一次关于意识形态、记忆与自我的电子游戏实验。',artistInfo:'ZA/UM，爱沙尼亚独立游戏工作室。主创 Robert Kurvitz。',url:'https://discoelysium.com/',img:''},
+  {title:'史丹利的寓言',artist:'Galactic Cafe',year:'2013',medium:'游戏类',theory:['观念艺术','元叙事','语言'],desc:'一个关于选择和叙事本身的游戏。当所有的门都通向同一个结局，选择是否还有意义？',artistInfo:'Galactic Cafe，由 Davey Wreden 与 William Pugh 创立。',url:'https://www.stanleyparable.com/',img:''},
+  {title:'艾迪芬奇的记忆',artist:'Giant Sparrow',year:'2017',medium:'游戏类',theory:['哥特文化','死亡','魔幻现实主义'],desc:'探索每一个家庭成员离奇死亡的故事。关于失去、家族与叙事的电子游戏诗篇。',artistInfo:'Giant Sparrow，由 Ian Dallas 创立于加州圣莫尼卡的独立游戏工作室。',url:'https://www.giantsparrow.com/',img:''},
+  {title:'肯塔基零号公路',artist:'Cardboard Computer',year:'2013-2020',medium:'游戏类',theory:['超现实主义','美国哥特','魔幻现实主义'],desc:'一部魔幻现实主义冒险游戏，讲述一个卡车司机在肯塔基州一条秘密公路上迷路的故事。',artistInfo:'Cardboard Computer，由 Jake Elliott、Tamas Kemenczy 与 Ben Babbitt 组成的独立游戏团队。',url:'https://kentuckyroutezero.com/',img:''}
+];
+
+function loadArtworks(){
+  try{
+    const s=localStorage.getItem(ART_KEY);
+    if(s){const a=JSON.parse(s);if(Array.isArray(a)&&a.length>0)return a;}
+  }catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_ARTWORKS));
+}
+let artworks=loadArtworks();
+function saveArtworks(){try{localStorage.setItem(ART_KEY,JSON.stringify(artworks));}catch(e){}}
+
+/* 索引渲染 */
+const workGrid=document.getElementById('workGrid');
+const filterBar=document.getElementById('filterBar');
+const searchInput=document.getElementById('searchInput');
+let currentFilter='all', currentSearch='';
+
+function renderWorks(){
+  const filtered=artworks.filter(w=>{
+    let mf=true;
+    if(currentFilter!=='all'){
+      const isM=w.medium===currentFilter;
+      const isT=w.theory&&w.theory.some(t=>t.includes(currentFilter));
+      mf=isM||isT;
+    }
+    let ms=true;
+    if(currentSearch){
+      const s=currentSearch.toLowerCase();
+      ms=(w.title.toLowerCase().includes(s)||w.artist.toLowerCase().includes(s)||w.medium.toLowerCase().includes(s)||(w.theory||[]).some(t=>t.toLowerCase().includes(s))||w.desc.toLowerCase().includes(s)||(w.artistInfo||'').toLowerCase().includes(s));
+    }
+    return mf&&ms;
+  });
+  if(filtered.length===0){
+    workGrid.innerHTML='<div class="empty-state">暂无匹配的作品</div>';
+    return;
+  }
+  workGrid.innerHTML=filtered.map(w=>{
+    const idx=artworks.indexOf(w);
+    const imgHtml=w.img?`<img src="${w.img}" alt="${w.title}" loading="lazy" onerror="this.style.display='none';this.parentNode.innerHTML='<span class=&quot;placeholder-icon&quot;>◆</span>'">`:'<span class="placeholder-icon">◆</span>';
+    return `
+      <div class="work-card" data-index="${idx}">
+        <div class="card-img">${imgHtml}</div>
+        <h3>${w.title}</h3>
+        <div class="meta">${w.artist} · ${w.year}</div>
+        <div class="desc">${w.desc}</div>
+        <div class="tag-row">
+          <span class="tag medium">${w.medium}</span>
+          ${(w.theory||[]).map(t=>`<span class="tag theory">${t}</span>`).join('')}
+        </div>
+        <span class="card-link">查看详情 →</span>
+      </div>
+    `;
+  }).join('');
+}
+workGrid.addEventListener('click',(e)=>{
+  const card=e.target.closest('.work-card');
+  if(!card) return;
+  const idx=parseInt(card.dataset.index);
+  if(!isNaN(idx)) openDetail(idx);
+});
+filterBar.addEventListener('click',(e)=>{
+  const btn=e.target.closest('.filter-btn');
+  if(!btn) return;
+  filterBar.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  currentFilter=btn.dataset.filter;
+  renderWorks();
+});
+searchInput.addEventListener('input',(e)=>{currentSearch=e.target.value.trim();renderWorks();});
+renderWorks();
+
+/* 详情页 */
+let currentDetailIndex=-1;
+function openDetail(index){
+  const w=artworks[index];
+  if(!w) return;
+  currentDetailIndex=index;
+  document.getElementById('detailTitle').textContent=w.title;
+  document.getElementById('detailYear').textContent=w.year;
+  document.getElementById('detailArtist').textContent=w.artist;
+  document.getElementById('detailDesc').textContent=w.desc;
+  document.getElementById('detailArtistInfo').textContent=w.artistInfo||'暂无介绍。';
+  document.getElementById('detailTheoryText').textContent=`媒介类别：${w.medium}　|　相关理论：${(w.theory||[]).join('、')}`;
+  const imgEl=document.getElementById('detailImg');
+  const ph=document.getElementById('detailImgPlaceholder');
+  if(w.img){
+    imgEl.src=w.img;imgEl.style.display='block';ph.style.display='none';
+    imgEl.onerror=()=>{imgEl.style.display='none';ph.style.display='flex';};
+  }else{
+    imgEl.style.display='none';ph.style.display='flex';
+  }
+  document.getElementById('detailTags').innerHTML=`<span class="tag medium">${w.medium}</span>`+(w.theory||[]).map(t=>`<span class="tag theory">${t}</span>`).join('');
+  document.getElementById('detailLink').href=w.url||'#';
+  showPage('detail');
+}
+function deleteArtwork(){
+  if(currentDetailIndex<0) return;
+  if(!confirm('确定删除这个作品吗？此操作不可恢复。')) return;
+  artworks.splice(currentDetailIndex,1);
+  saveArtworks();
+  renderWorks();
+  currentDetailIndex=-1;
+  showPage('index');
+}
+
+/* 作品编辑页 */
+let editingArtworkIndex=-1;
+function openArtworkEditor(index){
+  editingArtworkIndex=index;
+  const isNew=index<0;
+  document.getElementById('editPageTitle').textContent=isNew?'添加作品':'编辑作品';
+  const w=isNew?{title:'',artist:'',year:'',medium:'平面类',theory:[],desc:'',artistInfo:'',url:'',img:''}:artworks[index];
+  document.getElementById('editTitle').value=w.title||'';
+  document.getElementById('editArtist').value=w.artist||'';
+  document.getElementById('editYear').value=w.year||'';
+  document.getElementById('editMedium').value=w.medium||'平面类';
+  document.getElementById('editTheory').value=(w.theory||[]).join(', ');
+  document.getElementById('editDesc').value=w.desc||'';
+  document.getElementById('editArtistInfo').value=w.artistInfo||'';
+  document.getElementById('editUrl').value=w.url||'';
+  document.getElementById('editImg').value=w.img||'';
+  showPage('edit');
+}
+function cancelArtworkEdit(){
+  if(editingArtworkIndex>=0) showPage('detail');
+  else showPage('index');
+}
+function saveArtworkEdit(){
+  const title=document.getElementById('editTitle').value.trim();
+  const artist=document.getElementById('editArtist').value.trim();
+  if(!title||!artist){alert('请填写作品名称和艺术家/作者。');return;}
+  const newData={
+    title:title,
+    artist:artist,
+    year:document.getElementById('editYear').value.trim(),
+    medium:document.getElementById('editMedium').value,
+    theory:document.getElementById('editTheory').value.split(',').map(s=>s.trim()).filter(s=>s),
+    desc:document.getElementById('editDesc').value,
+    artistInfo:document.getElementById('editArtistInfo').value,
+    url:document.getElementById('editUrl').value.trim(),
+    img:document.getElementById('editImg').value.trim()
+  };
+  if(editingArtworkIndex>=0){
+    artworks[editingArtworkIndex]=newData;
+  }else{
+    artworks.push(newData);
+  }
+  saveArtworks();
+  renderWorks();
+  if(editingArtworkIndex>=0){
+    openDetail(editingArtworkIndex);
+  }else{
+    showPage('index');
+  }
+}
+
+/* 初始化 */
+renderStair();
+showPage('home');
+</script>
+</body>
+</html>
